@@ -2,6 +2,6 @@
   "name": "ideapilot",
   "version": "1.0.0",
   "scripts": {
-    "build": "mkdir dist && cp -r \"ideapilot website\"/* dist/"
+    "build": "rm -rf dist && mkdir dist && cp -r site/* dist/"
   }
 }
