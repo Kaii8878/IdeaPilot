@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IdeaForge AI</title>
+
+<style>
+* {
+  box-sizing: border-box;
+  font-family: Segoe UI, Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: #000000;
+}
+
+/* ---------- CONTAINER ---------- */
+.chat-container {
+  width: 460px;
+  height: 700px;
+  background: #f2f8ff;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 20px rgba(0,0,0,0.15);
+  overflow: hidden;
+}
+
+/* ---------- HEADER ---------- */
+.header {
+  background: #dbeeff;
+  padding: 14px;
+  border-bottom: 1px solid #b6d4ff;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo {
+  width: 38px;
+  height: 38px;
+  background: #3b82f6;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-text span {
+  font-weight: 600;
+  font-size: 18px;
+  color: #0b2a5b;
+}
+
+.brand-text small {
+  font-size: 12px;
+  color: #3b82f6;
+}
+
+/* ---------- QUICK OPTIONS ---------- */
+.quick-options {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  overflow-x: auto;
+  border-bottom: 1px solid #b6d4ff;
+}
+
+.quick-options button {
+  background: #ffffff;
+  border: 1px solid #b6d4ff;
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.quick-options button:hover {
+  background: #3b82f6;
+  color: white;
+}
+
+/* ---------- CHAT ---------- */
+.messages {
+  flex: 1;
+  padding: 14px;
+  overflow-y: auto;
+}
+
+.message {
+  max-width: 80%;
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  white-space: pre-line;
+  font-size: 14px;
+}
+
+.message.user {
+  background: #e6f2ff;
+  margin-left: auto;
+  border-bottom-right-radius: 4px;
+}
+
+.message.bot {
+  background: #ffffff;
+  color: #0b2a5b;
+  border-left: 3px solid #3b82f6;
+  margin-right: auto;
+  border-bottom-left-radius: 4px;
+}
+
+/* ---------- FEEDBACK ---------- */
+.feedback {
+  display: none;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px;
+  background: #dbeeff;
+  border-top: 1px solid #b6d4ff;
+}
+
+.feedback button {
+  background: transparent;
+  border: 1px solid #3b82f6;
+  color: #3b82f6;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* ---------- INPUT ---------- */
+.input-area {
+  display: flex;
+  padding: 12px;
+  background: #dbeeff;
+  border-top: 1px solid #b6d4ff;
+}
+
+input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #b6d4ff;
+  outline: none;
+}
+
+.send-btn {
+  margin-left: 10px;
+  padding: 10px 18px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="chat-container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="brand">
+      <div class="logo">IF</div>
+      <div class="brand-text">
+        <span>IdeaForge AI</span>
+        <small>Turn ideas into startups</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUICK INDUSTRY BUTTONS -->
+  <div class="quick-options">
+    <button onclick="quickSend('AI startup')">AI</button>
+    <button onclick="quickSend('Fitness app')">Fitness</button>
+    <button onclick="quickSend('Finance startup')">Finance</button>
+    <button onclick="quickSend('Education platform')">Education</button>
+    <button onclick="quickSend('Gaming startup')">Gaming</button>
+    <button onclick="quickSend('Healthcare idea')">Healthcare</button>
+    <button onclick="quickSend('Ecommerce tool')">Ecommerce</button>
+  </div>
+
+  <!-- CHAT -->
+  <div class="messages" id="messages"></div>
+
+  <div class="feedback" id="feedback">
+    <button onclick="rateIdea(true)">Good Idea</button>
+    <button onclick="rateIdea(false)">Bad Idea</button>
+  </div>
+
+  <!-- INPUT -->
+  <div class="input-area">
+    <input id="input" placeholder="Say hi or describe a problem..." />
+    <button class="send-btn" onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<script>
+const messages = document.getElementById("messages");
+const input = document.getElementById("input");
+const feedback = document.getElementById("feedback");
+
+function addMessage(text, sender) {
+  const div = document.createElement("div");
+  div.className = "message " + sender;
+  div.innerText = text;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function quickSend(text) {
+  input.value = text;
+  sendMessage();
+}
+
+function generateReply(text) {
+  text = text.toLowerCase();
+
+  if (["hi","hello","hey"].includes(text))
+    return "Hey 👋 I can help you generate startup ideas and monetization plans.";
+
+  if (text.includes("ai"))
+    return "Industry: AI\n\nStartup Idea:\nAn AI assistant that automates internal workflows for small teams.\n\nMonetization:\n1. Usage-based pricing\n2. Team subscriptions\n3. Enterprise plans";
+
+  if (text.includes("fitness"))
+    return "Industry: FITNESS\n\nStartup Idea:\nA smart fitness app that adjusts workouts based on energy levels.\n\nMonetization:\n1. Monthly subscriptions\n2. Coaching add-ons\n3. Brand partnerships";
+
+  if (text.includes("finance"))
+    return "Industry: FINANCE\n\nStartup Idea:\nA predictive budgeting app that warns users before overspending.\n\nMonetization:\n1. Premium features\n2. Bank partnerships\n3. Referral commissions";
+
+  return "Tell me an industry or problem and I will generate a startup idea with monetization.";
+}
+
+function sendMessage() {
+  const text = input.value;
+  if (!text.trim()) return;
+  addMessage(text, "user");
+  input.value = "";
+  addMessage(generateReply(text), "bot");
+  feedback.style.display = "flex";
+}
+
+function rateIdea(isGood) {
+  addMessage(isGood ? "Noted. I will suggest more ideas like this." : "Got it. I will improve.", "bot");
+  feedback.style.display = "none";
+}
+
+input.addEventListener("keydown", e => {
+  if (e.key === "Enter") sendMessage();
+});
+</script>
+
+</body>
+</html>
+
